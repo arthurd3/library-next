@@ -1,4 +1,10 @@
-export const ProfileView = () => (
+import { User } from '../../../../../contexts/models/userModel';
+
+interface ProfileViewProps {
+  user: User | null;
+}
+
+export const ProfileView = ({ user }: ProfileViewProps) => (
   <>
     <div className="mb-10">
       <h1 className="text-3xl font-extrabold text-stone-900 tracking-tighter">Meu Perfil</h1>
@@ -14,7 +20,7 @@ export const ProfileView = () => (
             </label>
             <input
               type="text"
-              defaultValue="Arthur Silva"
+              defaultValue={user?.name}
               className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
             />
           </div>
@@ -24,7 +30,7 @@ export const ProfileView = () => (
             </label>
             <input
               type="email"
-              defaultValue="arthur.silva@email.com"
+              defaultValue={user?.email}
               className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
             />
           </div>
@@ -34,7 +40,7 @@ export const ProfileView = () => (
             </label>
             <input
               type="text"
-              defaultValue="2023001"
+              defaultValue={user?.registration}
               className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
             />
           </div>

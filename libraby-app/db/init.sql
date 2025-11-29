@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    matricula VARCHAR(50) UNIQUE NOT NULL,
+    registration VARCHAR(50) UNIQUE NOT NULL,
     phone VARCHAR(20),
     address TEXT,
     role_id INTEGER REFERENCES roles(id),
@@ -74,8 +74,8 @@ INSERT INTO genres (name) VALUES
 ('Autoajuda'),
 ('Fábula');
 
-INSERT INTO users (name, email, matricula, phone, address, role_id) VALUES
-('Arthur Silva', 'arthur.silva@email.com', '2023001', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo, SP', 3);
+INSERT INTO users (name, email, registration, phone, address, role_id) VALUES
+('Arthur Silva', 'admin@gmail.com', '2023001', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo, SP', 3);
 
 INSERT INTO books (title, author, genre_id, cover_url, available) VALUES
 ('Dom Casmurro', 'Machado de Assis', 1, 'https://via.placeholder.com/200x300/8B5A3C/FFFFFF?text=Dom+Casmurro', true),

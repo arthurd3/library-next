@@ -1,7 +1,8 @@
-import Dashboard from '@/src/app/(restricted)/(app)/dashboard/page';
 import { BookOpen, Clock, Users, AlertCircle, LogOut, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -9,6 +10,8 @@ interface SidebarProps {
 
 export const Sidebar = ({ sidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
+  const { logout } = useAuth();
+  const router = useRouter();
 
   return (
   <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-stone-900 text-stone-400 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] flex-shrink-0 flex flex-col shadow-2xl z-20`}>
@@ -47,12 +50,13 @@ export const Sidebar = ({ sidebarOpen }: SidebarProps) => {
     </nav>
 
     <div className="p-4 border-t border-stone-800/40">
-       <Link href="/login">
-         <button className="w-full flex items-center gap-3 px-4 py-3 text-stone-500 hover:text-white hover:bg-stone-800 rounded-2xl transition-all">
-            <LogOut size={18} />
-            {sidebarOpen && <span className="text-[13px] font-bold">Sair</span>}
-         </button>
-       </Link>
+       <button 
+         onClick={() => { logout(); router.push('/login'); }}
+         className="w-full flex items-center gap-3 px-4 py-3 text-stone-500 hover:text-white hover:bg-stone-800 rounded-2xl transition-all"
+       >
+          <LogOut size={18} />
+          {sidebarOpen && <span className="text-[13px] font-bold">Sair</span>}
+       </button>
     </div>
   </aside>
   );

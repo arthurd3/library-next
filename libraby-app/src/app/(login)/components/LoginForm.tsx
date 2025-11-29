@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginFunction } from '../../../../../lib/actions/login/loginFunction';
+import { useAuth } from '../../../contexts/AuthContext';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Label } from './ui/Label';
@@ -13,6 +13,7 @@ export const LoginForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+  const { login } = useAuth();
 
   async function submitLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +26,7 @@ export const LoginForm: React.FC = () => {
     setIsLoading(true);
     setErrorMessage('');
 
-    const isAuth = await loginFunction(email, password);
+    const isAuth = await login(email, password);
 
     if (isAuth) {
       setIsLoading(false);
@@ -38,6 +39,7 @@ export const LoginForm: React.FC = () => {
 
   return (
     <div className="w-full max-w-md bg-white p-10 rounded-2xl shadow-xl border border-stone-200">
+      
       {/* HEADER */}
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-serif font-bold text-stone-800">
