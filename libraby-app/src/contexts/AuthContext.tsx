@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType } from './models/authContextType';
-import { User } from './models/userModel';
+import { User } from '../models/UserModel';
 import { AuthProviderProps } from './models/authProviderProps';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,14 +18,6 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-    //   setUser(JSON.parse(storedUser));
-    }
-    // setIsLoading(false);
-  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -36,6 +28,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           email: 'admin@gmail.com',
           registration: '2023001',
           role: 'user',
+          created_at: new Date(),
         };
         setUser(mockUser);
         return true;

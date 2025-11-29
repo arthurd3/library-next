@@ -15,7 +15,7 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
 
   useEffect(() => {
     if (!user) {
-      router.push('/login');
+      router.push('/');
     }
   }, [user, router]);
 

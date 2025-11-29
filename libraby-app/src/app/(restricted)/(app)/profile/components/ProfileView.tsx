@@ -1,4 +1,4 @@
-import { User } from '../../../../../contexts/models/userModel';
+import { User } from '../../../../../models/UserModel';
 
 interface ProfileViewProps {
   user: User | null;
