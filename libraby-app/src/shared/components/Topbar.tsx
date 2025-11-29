@@ -1,11 +1,21 @@
 import { Search, Bell, Menu, ChevronRight } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 interface TopbarProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
 }
 
-export const Topbar = ({ sidebarOpen, onToggleSidebar }: TopbarProps) => (
+export const Topbar = ({ sidebarOpen, onToggleSidebar }: TopbarProps) => {
+  const pathname = usePathname();
+
+  let pageName = 'Dashboard';
+  if (pathname === '/collection') pageName = 'Acervo';
+  else if (pathname === '/mybooks') pageName = 'Meus Livros';
+  else if (pathname === '/profile') pageName = 'Perfil';
+  else if (pathname === '/fines') pageName = 'Multas';
+
+  return (
   <header className="h-20 bg-white/80 backdrop-blur-md border-b border-stone-100 flex items-center justify-between px-8 shadow-sm z-10 flex-shrink-0 sticky top-0">
     <div className="flex items-center gap-5">
       <button onClick={onToggleSidebar} className="p-2 text-stone-400 hover:text-stone-800 hover:bg-stone-50 rounded-xl transition-colors">
@@ -14,7 +24,7 @@ export const Topbar = ({ sidebarOpen, onToggleSidebar }: TopbarProps) => (
       <div className="hidden md:flex items-center text-xs font-bold tracking-wide text-stone-400 uppercase">
         <span>Biblioteca</span>
         <ChevronRight size={12} className="mx-2 text-stone-300" />
-        <span className="text-stone-800 bg-stone-50 px-2.5 py-1 rounded border border-stone-100">Dashboard</span>
+        <span className="text-stone-800 bg-stone-50 px-2.5 py-1 rounded border border-stone-100">{pageName}</span>
       </div>
     </div>
 
@@ -38,4 +48,5 @@ export const Topbar = ({ sidebarOpen, onToggleSidebar }: TopbarProps) => (
       </div>
     </div>
   </header>
-);
+  );
+};

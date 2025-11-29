@@ -1,5 +1,5 @@
-import { StatsGrid } from './StatsGrid';
-import { LoansTable } from './LoansTable';
+import { StatsGrid } from './ui/StatsGrid';
+import { LoansTable } from './ui/LoansTable';
 
 export const DashboardView = () => (
   <>

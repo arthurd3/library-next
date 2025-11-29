@@ -25,8 +25,8 @@ export const Sidebar = ({ sidebarOpen }: SidebarProps) => {
         { icon: BookOpen, label: 'Acervo', href: '/collection' },
         { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
         { icon: Clock, label: 'Empréstimos', href: '/mybooks' },
-        { icon: Users, label: 'Leitores', href: '/profile' },
-        { icon: AlertCircle, label: 'Pendências', href: '/fines' },
+        { icon: AlertCircle, label: 'Multas', href: '/fines' },
+        { icon: Users, label: 'Perfil', href: '/profile' },
       ].map((item, idx) => {
         const active = pathname === item.href;
         return (
