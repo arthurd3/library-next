@@ -1,15 +1,15 @@
-import { UserService } from '@/src/db';
+import { UserDao } from '@/src/db';
 
 export async function removeUser(id: number) {
   try {
     // Verificar se usuário existe
-    const existingUser = await UserService.getUserById(id);
+    const existingUser = await UserDao.getUserById(id);
     if (!existingUser) {
       return { success: false, error: 'Usuário não encontrado' };
     }
 
     // Remover usuário
-    const deleted = await UserService.deleteUser(id);
+    const deleted = await UserDao.deleteUser(id);
 
     if (!deleted) {
       return { success: false, error: 'Falha ao remover usuário' };

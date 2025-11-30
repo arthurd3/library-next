@@ -1,4 +1,4 @@
-import { UserService } from '@/src/db';
+import { UserDao } from '@/src/db';
 
 interface UpdateUserParams {
   id: number;
@@ -12,14 +12,14 @@ interface UpdateUserParams {
 export async function updateUser(params: UpdateUserParams) {
   try {
     // Verificar se usuário existe
-    const existingUser = await UserService.getUserById(params.id);
+    const existingUser = await UserDao.getUserById(params.id);
     if (!existingUser) {
       return { success: false, error: 'Usuário não encontrado' };
     }
 
     // Verificar se email já está sendo usado por outro usuário
     if (params.email !== existingUser.email) {
-      const userWithEmail = await UserService.getUserByEmail(params.email);
+      const userWithEmail = await UserDao.getUserByEmail(params.email);
       if (userWithEmail) {
         return { success: false, error: 'Email já está sendo usado por outro usuário' };
       }
@@ -27,14 +27,14 @@ export async function updateUser(params: UpdateUserParams) {
 
     // Verificar se matrícula já está sendo usada por outro usuário
     if (params.registration !== existingUser.registration) {
-      const userWithRegistration = await UserService.getUserByRegistration(params.registration);
+      const userWithRegistration = await UserDao.getUserByRegistration(params.registration);
       if (userWithRegistration) {
         return { success: false, error: 'Matrícula já está sendo usada por outro usuário' };
       }
     }
 
     // Atualizar usuário
-    const updatedUser = await UserService.updateUser(
+    const updatedUser = await UserDao.updateUser(
       params.id,
       params.name,
       params.email,

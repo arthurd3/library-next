@@ -1,7 +1,7 @@
 import pool from './connection/db';
 import { Genre } from '@/src/models/GenreModel';
 
-export class GenreService {
+export class GenreDao {
   static async getAllGenres(): Promise<Genre[]> {
     try {
       const query = 'SELECT * FROM genres ORDER BY name';

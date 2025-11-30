@@ -1,17 +1,14 @@
 
-import { UserService } from '@/src/db';
+import { UserDao } from '@/src/db';
 
 export async function loginFunction(email: string, password: string): Promise<{ success: boolean; user?: any; message?: string }> {
   try {
-    // Buscar usuário por email
-    const user = await UserService.getUserByEmail(email);
 
+    const user = await UserDao.getUserByEmail(email);
     if (!user) {
       return { success: false, message: 'Usuário não encontrado' };
     }
 
-    // Verificar senha (em produção, use bcrypt para comparar hash)
-    // Por enquanto, verificação simples
     if (user.password !== password) {
       return { success: false, message: 'Senha incorreta' };
     }

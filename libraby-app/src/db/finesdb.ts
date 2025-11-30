@@ -1,7 +1,7 @@
 import pool from './connection/db';
 import { Fine } from '@/src/models/FineModel';
 
-export class FineService {
+export class FineDao {
   static async getAllFines(): Promise<Fine[]> {
     try {
       const query = 'SELECT * FROM fines ORDER BY created_at DESC';

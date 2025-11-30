@@ -1,8 +1,8 @@
-import { BookService } from '@/src/db';
+import { BookDao } from '@/src/db';
 
 export async function findAllBooks() {
   try {
-    const books = await BookService.getAllBooks();
+    const books = await BookDao.getAllBooks();
     return { success: true, books };
   } catch (error) {
     console.error('Erro ao buscar livros:', error);
@@ -12,7 +12,7 @@ export async function findAllBooks() {
 
 export async function findBookById(id: number) {
   try {
-    const book = await BookService.getBookById(id);
+    const book = await BookDao.getBookById(id);
     if (!book) {
       return { success: false, error: 'Livro não encontrado' };
     }
@@ -25,7 +25,7 @@ export async function findBookById(id: number) {
 
 export async function findAvailableBooks() {
   try {
-    const books = await BookService.getAvailableBooks();
+    const books = await BookDao.getAvailableBooks();
     return { success: true, books };
   } catch (error) {
     console.error('Erro ao buscar livros disponíveis:', error);
@@ -35,7 +35,7 @@ export async function findAvailableBooks() {
 
 export async function findBooksByGenre(genreId: number) {
   try {
-    const books = await BookService.getBooksByGenre(genreId);
+    const books = await BookDao.getBooksByGenre(genreId);
     return { success: true, books };
   } catch (error) {
     console.error('Erro ao buscar livros por gênero:', error);
@@ -45,7 +45,7 @@ export async function findBooksByGenre(genreId: number) {
 
 export async function searchBooksByTitle(title: string) {
   try {
-    const books = await BookService.searchBooksByTitle(title);
+    const books = await BookDao.searchBooksByTitle(title);
     return { success: true, books };
   } catch (error) {
     console.error('Erro ao buscar livros por título:', error);
@@ -55,7 +55,7 @@ export async function searchBooksByTitle(title: string) {
 
 export async function searchBooksByAuthor(author: string) {
   try {
-    const books = await BookService.searchBooksByAuthor(author);
+    const books = await BookDao.searchBooksByAuthor(author);
     return { success: true, books };
   } catch (error) {
     console.error('Erro ao buscar livros por autor:', error);

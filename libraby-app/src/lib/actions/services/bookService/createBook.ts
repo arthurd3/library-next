@@ -1,4 +1,4 @@
-import { BookService } from '@/src/db';
+import { BookDao } from '@/src/db';
 
 interface CreateBookParams {
   title: string;
@@ -10,7 +10,7 @@ interface CreateBookParams {
 
 export async function createBook(params: CreateBookParams) {
   try {
-    const newBook = await BookService.createBook(
+    const newBook = await BookDao.createBook(
       params.title,
       params.author,
       params.description,

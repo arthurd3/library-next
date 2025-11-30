@@ -1,7 +1,7 @@
 import pool from './connection/db';
 import { Loan } from '@/src/models/LoanModel';
 
-export class LoanService {
+export class LoanDao {
   static async getAllLoans(): Promise<Loan[]> {
     try {
       const query = 'SELECT * FROM loans ORDER BY loan_date DESC';

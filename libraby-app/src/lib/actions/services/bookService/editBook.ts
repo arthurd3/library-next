@@ -1,4 +1,4 @@
-import { BookService } from '@/src/db';
+import { BookDao } from '@/src/db';
 
 interface EditBookParams {
   id: number;
@@ -13,13 +13,13 @@ interface EditBookParams {
 export async function editBook(params: EditBookParams) {
   try {
     // Verificar se livro existe
-    const existingBook = await BookService.getBookById(params.id);
+    const existingBook = await BookDao.getBookById(params.id);
     if (!existingBook) {
       return { success: false, error: 'Livro não encontrado' };
     }
 
     // Atualizar livro
-    const updatedBook = await BookService.updateBook(
+    const updatedBook = await BookDao.updateBook(
       params.id,
       params.title,
       params.author,
@@ -42,7 +42,7 @@ export async function editBook(params: EditBookParams) {
 
 export async function updateBookAvailability(id: number, available: boolean) {
   try {
-    const updatedBook = await BookService.updateBookAvailability(id, available);
+    const updatedBook = await BookDao.updateBookAvailability(id, available);
     if (!updatedBook) {
       return { success: false, error: 'Livro não encontrado' };
     }

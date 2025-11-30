@@ -1,7 +1,8 @@
 import { User } from '@/src/models/UserModel';
 import pool from './connection/db';
 
-export class UserService {
+export class UserDao {
+
   static async getUserByEmail(email: string): Promise<User | null> {
     try {
       const query = 'SELECT * FROM users WHERE email = $1';
@@ -47,10 +48,10 @@ export class UserService {
     }
   }
 
-  static async createUser(name: string, email: string, registration: string, phone?: string, address?: string, roleId: number = 3): Promise<User> {
+  static async createUser(name: string, email: string, password: string, registration: string, phone?: string, address?: string, roleId: number = 3): Promise<User> {
     try {
-      const query = 'INSERT INTO users (name, email, registration, phone, address, role_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-      const result = await pool.query(query, [name, email, registration, phone, address, roleId]);
+      const query = 'INSERT INTO users (name, email, password, registration, phone, address, role_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
+      const result = await pool.query(query, [name, email, password, registration, phone, address, roleId]);
       return result.rows[0];
     } catch (error) {
       console.error('Erro ao criar usuário:', error);

@@ -1,8 +1,8 @@
-import { UserService } from '@/src/db';
+import { UserDao } from '@/src/db';
 
 export async function findUserById(id: number) {
   try {
-    const user = await UserService.getUserById(id);
+    const user = await UserDao.getUserById(id);
     if (!user) {
       return { success: false, error: 'Usuário não encontrado' };
     }
@@ -15,7 +15,7 @@ export async function findUserById(id: number) {
 
 export async function findUserByEmail(email: string) {
   try {
-    const user = await UserService.getUserByEmail(email);
+    const user = await UserDao.getUserByEmail(email);
     if (!user) {
       return { success: false, error: 'Usuário não encontrado' };
     }
@@ -28,7 +28,7 @@ export async function findUserByEmail(email: string) {
 
 export async function findUserByRegistration(registration: string) {
   try {
-    const user = await UserService.getUserByRegistration(registration);
+    const user = await UserDao.getUserByRegistration(registration);
     if (!user) {
       return { success: false, error: 'Usuário não encontrado' };
     }
@@ -41,7 +41,7 @@ export async function findUserByRegistration(registration: string) {
 
 export async function findAllUsers() {
   try {
-    const users = await UserService.getAllUsers();
+    const users = await UserDao.getAllUsers();
     return { success: true, users };
   } catch (error) {
     console.error('Erro ao buscar usuários:', error);

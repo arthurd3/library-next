@@ -1,7 +1,7 @@
 import pool from './connection/db';
 import { Book } from '@/src/models/BookModel';
 
-export class BookService {
+export class BookDao {
   static async getAllBooks(): Promise<Book[]> {
     try {
       const query = 'SELECT * FROM books ORDER BY title';

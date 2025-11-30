@@ -1,15 +1,15 @@
-import { BookService } from '@/src/db';
+import { BookDao } from '@/src/db';
 
 export async function removeBook(id: number) {
   try {
     // Verificar se livro existe
-    const existingBook = await BookService.getBookById(id);
+    const existingBook = await BookDao.getBookById(id);
     if (!existingBook) {
       return { success: false, error: 'Livro não encontrado' };
     }
 
     // Remover livro
-    const deleted = await BookService.deleteBook(id);
+    const deleted = await BookDao.deleteBook(id);
 
     if (!deleted) {
       return { success: false, error: 'Falha ao remover livro' };

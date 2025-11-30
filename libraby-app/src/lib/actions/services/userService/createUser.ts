@@ -1,4 +1,4 @@
-import { UserService } from '@/src/db';
+import { UserDao } from '@/src/db';
 
 interface CreateUserParams {
   name: string;
@@ -12,26 +12,25 @@ interface CreateUserParams {
 
 export async function createUser(params: CreateUserParams) {
   try {
-    // Verificar se usuário já existe
-    const existingUser = await UserService.getUserByEmail(params.email);
+
+    const existingUser = await UserDao.getUserByEmail(params.email);
     if (existingUser) {
       throw new Error('Usuário com este email já existe');
     }
 
-    const existingRegistration = await UserService.getUserByRegistration(params.registration);
+    const existingRegistration = await UserDao.getUserByRegistration(params.registration);
     if (existingRegistration) {
       throw new Error('Usuário com esta matrícula já existe');
     }
 
-    // Criar usuário
-    const newUser = await UserService.createUser(
+    const newUser = await UserDao.createUser(
       params.name,
       params.email,
-      params.registration,
       params.password,
+      params.registration,
       params.phone,
       params.address,
-      params.roleId || 3 // Default para usuário comum
+      params.roleId || 3 
     );
 
     return { success: true, user: newUser };
