@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, Clock, Users, AlertCircle, LogOut, LayoutDashboard, UserSearch, UserSquare2Icon, UserPlus2, BookmarkCheckIcon } from 'lucide-react';
+import { BookOpen, Clock, Users, AlertCircle, LogOut, LayoutDashboard, UserSquare2Icon, UserPlus2, BookmarkCheckIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';

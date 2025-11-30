@@ -40,7 +40,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         console.error('Erro ao restaurar sessão:', error);
       } finally {
-       
         setIsLoading(false);
       }
     };
