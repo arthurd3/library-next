@@ -1,46 +1,54 @@
 import { BookOpen, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getBooksForManagement, BookWithGenre } from '@/src/lib/actions/services/adminService/bookManagement';
 
-const books = [
-  {
-    id: 1,
-    title: 'Dom Casmurro',
-    author: 'Machado de Assis',
-    genre: 'Romance',
-    available: true,
-    totalCopies: 5,
-    availableCopies: 3,
-  },
-  {
-    id: 2,
-    title: 'Clean Architecture',
-    author: 'Robert C. Martin',
-    genre: 'Tecnologia',
-    available: false,
-    totalCopies: 3,
-    availableCopies: 0,
-  },
-  {
-    id: 3,
-    title: 'O Hobbit',
-    author: 'J.R.R. Tolkien',
-    genre: 'Fantasia',
-    available: true,
-    totalCopies: 4,
-    availableCopies: 4,
-  },
-  {
-    id: 4,
-    title: '1984',
-    author: 'George Orwell',
-    genre: 'Distopia',
-    available: true,
-    totalCopies: 6,
-    availableCopies: 2,
-  },
-];
+export const BookManagement = () => {
+  const [books, setBooks] = useState<BookWithGenre[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-export const BookManagement = () => (
-  <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6 mt-8">
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const data = await getBooksForManagement();
+        setBooks(data);
+      } catch (error) {
+        console.error('Erro ao buscar livros:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
+
+  const filteredBooks = books.filter(book =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.genre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6 mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-extrabold text-stone-900 tracking-tight">Gerenciamento de Livros</h3>
+          <BookOpen className="w-5 h-5 text-stone-400" />
+        </div>
+        <div className="animate-pulse">
+          <div className="h-10 bg-stone-200 rounded mb-4"></div>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-16 bg-stone-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6 mt-8">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-lg font-extrabold text-stone-900 tracking-tight">Gerenciamento de Livros</h3>
       <BookOpen className="w-5 h-5 text-stone-400" />
@@ -52,6 +60,8 @@ export const BookManagement = () => (
         <input
           type="text"
           placeholder="Buscar livros..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200"
         />
       </div>
@@ -74,7 +84,7 @@ export const BookManagement = () => (
           </tr>
         </thead>
         <tbody>
-          {books.map((book) => (
+          {filteredBooks.map((book) => (
             <tr key={book.id} className="border-b border-stone-100 hover:bg-stone-50 transition-colors">
               <td className="py-4 px-4">
                 <div>
@@ -121,7 +131,7 @@ export const BookManagement = () => (
 
     <div className="flex items-center justify-between mt-6">
       <p className="text-sm text-stone-500">
-        Mostrando 4 de 3.492 livros
+        Mostrando {filteredBooks.length} de {books.length} livros
       </p>
       <div className="flex gap-2">
         <button className="px-3 py-1 text-sm font-bold text-stone-600 hover:text-stone-900 transition-colors">
@@ -133,4 +143,5 @@ export const BookManagement = () => (
       </div>
     </div>
   </div>
-);
+  );
+};

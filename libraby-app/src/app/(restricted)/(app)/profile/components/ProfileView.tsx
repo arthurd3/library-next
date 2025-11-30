@@ -1,7 +1,7 @@
 import { User } from '../../../../../models/UserModel';
 
 interface ProfileViewProps {
-  user: User | null;
+  user: Omit<User, 'password'> | null;
 }
 
 export const ProfileView = ({ user }: ProfileViewProps) => (

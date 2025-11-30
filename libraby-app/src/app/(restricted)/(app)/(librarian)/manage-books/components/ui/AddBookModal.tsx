@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Save, BookOpen } from 'lucide-react';
+import { createBook } from '@/src/lib/actions/services/bookService/createBook';
+import { getGenres, Genre } from '@/src/lib/actions/services/genreService/genreService';
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -13,9 +15,6 @@ interface BookFormData {
   author: string;
   description: string;
   genreId: string;
-  isbn: string;
-  publicationYear: string;
-  totalCopies: string;
   coverUrl: string;
 }
 
@@ -25,13 +24,29 @@ export const AddBookModal = ({ isOpen, onClose }: AddBookModalProps) => {
     author: '',
     description: '',
     genreId: '',
-    isbn: '',
-    publicationYear: '',
-    totalCopies: '1',
     coverUrl: '',
   });
 
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingGenres, setLoadingGenres] = useState(true);
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const data = await getGenres();
+        setGenres(data);
+      } catch (error) {
+        console.error('Erro ao buscar gêneros:', error);
+      } finally {
+        setLoadingGenres(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchGenres();
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -46,26 +61,29 @@ export const AddBookModal = ({ isOpen, onClose }: AddBookModalProps) => {
     setIsSubmitting(true);
 
     try {
-      // Aqui você implementaria a chamada para a API
-      console.log('Dados do livro:', formData);
-
-      // Simulação de delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Reset do formulário após sucesso
-      setFormData({
-        title: '',
-        author: '',
-        description: '',
-        genreId: '',
-        isbn: '',
-        publicationYear: '',
-        totalCopies: '1',
-        coverUrl: '',
+      const result = await createBook({
+        title: formData.title,
+        author: formData.author,
+        description: formData.description || undefined,
+        genreId: formData.genreId ? parseInt(formData.genreId) : undefined,
+        coverUrl: formData.coverUrl || undefined,
       });
 
-      onClose();
-      alert('Livro cadastrado com sucesso!');
+      if (result.success) {
+        // Reset do formulário após sucesso
+        setFormData({
+          title: '',
+          author: '',
+          description: '',
+          genreId: '',
+          coverUrl: '',
+        });
+
+        onClose();
+        alert('Livro cadastrado com sucesso!');
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
     } catch (error) {
       console.error('Erro ao cadastrar livro:', error);
       alert('Erro ao cadastrar livro. Tente novamente.');
@@ -73,15 +91,6 @@ export const AddBookModal = ({ isOpen, onClose }: AddBookModalProps) => {
       setIsSubmitting(false);
     }
   };
-
-  const genres = [
-    { id: '1', name: 'Romance' },
-    { id: '2', name: 'Tecnologia' },
-    { id: '3', name: 'Fantasia' },
-    { id: '4', name: 'Distopia' },
-    { id: '5', name: 'Autoajuda' },
-    { id: '6', name: 'Fábula' },
-  ];
 
   if (!isOpen) return null;
 
@@ -148,59 +157,16 @@ export const AddBookModal = ({ isOpen, onClose }: AddBookModalProps) => {
                   value={formData.genreId}
                   onChange={handleInputChange}
                   required
-                  className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
+                  disabled={loadingGenres}
+                  className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm disabled:opacity-50"
                 >
-                  <option value="">Selecione um gênero</option>
+                  <option value="">
+                    {loadingGenres ? 'Carregando gêneros...' : 'Selecione um gênero'}
+                  </option>
                   {genres.map(genre => (
-                    <option key={genre.id} value={genre.id}>{genre.name}</option>
+                    <option key={genre.id} value={genre.id.toString()}>{genre.name}</option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1 ml-1">
-                  ISBN
-                </label>
-                <input
-                  type="text"
-                  name="isbn"
-                  value={formData.isbn}
-                  onChange={handleInputChange}
-                  className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
-                  placeholder="978-85-1234-5678"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1 ml-1">
-                  Ano de Publicação
-                </label>
-                <input
-                  type="number"
-                  name="publicationYear"
-                  value={formData.publicationYear}
-                  onChange={handleInputChange}
-                  min="1000"
-                  max={new Date().getFullYear()}
-                  className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
-                  placeholder="2024"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1 ml-1">
-                  Número de Exemplares *
-                </label>
-                <input
-                  type="number"
-                  name="totalCopies"
-                  value={formData.totalCopies}
-                  onChange={handleInputChange}
-                  required
-                  min="1"
-                  className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
-                  placeholder="1"
-                />
               </div>
 
               <div className="md:col-span-2">

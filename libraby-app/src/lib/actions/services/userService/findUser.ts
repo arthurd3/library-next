@@ -6,7 +6,8 @@ export async function findUserById(id: number) {
     if (!user) {
       return { success: false, error: 'Usuário não encontrado' };
     }
-    return { success: true, user };
+    const { password: _, ...userWithoutPassword } = user;
+    return { success: true, user: userWithoutPassword };
   } catch (error) {
     console.error('Erro ao buscar usuário:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' };

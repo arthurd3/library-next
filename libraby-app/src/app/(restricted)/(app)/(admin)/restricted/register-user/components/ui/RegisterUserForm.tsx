@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { UserPlus, Save, X } from 'lucide-react';
+import { createUser } from '@/src/lib/actions/services/userService/createUser';
 
 interface UserFormData {
   name: string;
   email: string;
   registration: string;
+  password: string;
   phone: string;
   address: string;
   role: 'user' | 'librarian';
@@ -17,6 +19,7 @@ export const RegisterUserForm = () => {
     name: '',
     email: '',
     registration: '',
+    password: '',
     phone: '',
     address: '',
     role: 'user',
@@ -37,16 +40,31 @@ export const RegisterUserForm = () => {
     setIsSubmitting(true);
 
     try {
-      setFormData({
-        name: '',
-        email: '',
-        registration: '',
-        phone: '',
-        address: '',
-        role: 'user',
+      const roleId = formData.role === 'librarian' ? 2 : 3;
+      const result = await createUser({
+        name: formData.name,
+        email: formData.email,
+        registration: formData.registration,
+        password: formData.password,
+        phone: formData.phone || undefined,
+        address: formData.address || undefined,
+        roleId,
       });
 
-      alert('Usuário cadastrado com sucesso!');
+      if (result.success) {
+        setFormData({
+          name: '',
+          email: '',
+          registration: '',
+          password: '',
+          phone: '',
+          address: '',
+          role: 'user',
+        });
+        alert('Usuário cadastrado com sucesso!');
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error);
       alert('Erro ao cadastrar usuário. Tente novamente.');
@@ -60,6 +78,7 @@ export const RegisterUserForm = () => {
       name: '',
       email: '',
       registration: '',
+      password: '',
       phone: '',
       address: '',
       role: 'user',
@@ -122,6 +141,21 @@ export const RegisterUserForm = () => {
               required
               className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
               placeholder="2024001"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1 ml-1">
+              Senha *
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              className="w-full pl-4 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200 ease-in-out shadow-sm"
+              placeholder="Digite a senha"
             />
           </div>
 

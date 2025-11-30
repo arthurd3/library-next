@@ -1,55 +1,50 @@
-import { Clock, UserPlus, BookOpen, AlertCircle } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getRecentActivities, Activity } from '@/src/lib/actions/services/adminService/recentActivities';
 
-const activities = [
-  {
-    id: 1,
-    type: 'user_registered',
-    message: 'Novo usuário registrado: Maria Silva',
-    time: '2 minutos atrás',
-    icon: UserPlus,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-  },
-  {
-    id: 2,
-    type: 'book_loaned',
-    message: 'Livro emprestado: "Dom Casmurro" para João Santos',
-    time: '15 minutos atrás',
-    icon: BookOpen,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-  },
-  {
-    id: 3,
-    type: 'book_returned',
-    message: 'Livro devolvido: "1984" por Ana Costa',
-    time: '1 hora atrás',
-    icon: BookOpen,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-  },
-  {
-    id: 4,
-    type: 'fine_created',
-    message: 'Multa gerada para Pedro Lima (atraso)',
-    time: '2 horas atrás',
-    icon: AlertCircle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-  },
-  {
-    id: 5,
-    type: 'user_registered',
-    message: 'Novo usuário registrado: Carlos Eduardo',
-    time: '3 horas atrás',
-    icon: UserPlus,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-  },
-];
+export const RecentActivity = () => {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export const RecentActivity = () => (
-  <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const data = await getRecentActivities(5);
+        setActivities(data);
+      } catch (error) {
+        console.error('Erro ao buscar atividades recentes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-extrabold text-stone-900 tracking-tight">Atividades Recentes</h3>
+          <Clock className="w-5 h-5 text-stone-400" />
+        </div>
+        <div className="space-y-4 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 rounded-xl">
+              <div className="w-8 h-8 bg-stone-200 rounded-lg flex-shrink-0"></div>
+              <div className="flex-1">
+                <div className="h-4 bg-stone-200 rounded mb-2"></div>
+                <div className="h-3 bg-stone-200 rounded w-1/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-lg font-extrabold text-stone-900 tracking-tight">Atividades Recentes</h3>
       <Clock className="w-5 h-5 text-stone-400" />
@@ -77,4 +72,5 @@ export const RecentActivity = () => (
       Ver todas as atividades
     </button>
   </div>
-);
+  );
+};

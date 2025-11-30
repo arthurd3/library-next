@@ -1,77 +1,105 @@
 import { BookOpen, Search, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
-
-const books = [
-  {
-    id: 1,
-    title: 'Dom Casmurro',
-    author: 'Machado de Assis',
-    genre: 'Romance',
-    available: true,
-    totalCopies: 5,
-    availableCopies: 3,
-    isbn: '978-85-1234-5678',
-    publicationYear: 1899,
-  },
-  {
-    id: 2,
-    title: 'Clean Architecture',
-    author: 'Robert C. Martin',
-    genre: 'Tecnologia',
-    available: false,
-    totalCopies: 3,
-    availableCopies: 0,
-    isbn: '978-85-1234-5679',
-    publicationYear: 2017,
-  },
-  {
-    id: 3,
-    title: 'O Hobbit',
-    author: 'J.R.R. Tolkien',
-    genre: 'Fantasia',
-    available: true,
-    totalCopies: 4,
-    availableCopies: 4,
-    isbn: '978-85-1234-5680',
-    publicationYear: 1937,
-  },
-  {
-    id: 4,
-    title: '1984',
-    author: 'George Orwell',
-    genre: 'Distopia',
-    available: true,
-    totalCopies: 6,
-    availableCopies: 2,
-    isbn: '978-85-1234-5681',
-    publicationYear: 1949,
-  },
-];
+import { useState, useEffect } from 'react';
+import { editBook } from '@/src/lib/actions/services/bookService/editBook';
+import { removeBook } from '@/src/lib/actions/services/bookService/removeBook';
+import { BookWithGenre, getBooksForManagement } from '@/src/lib/actions/services/adminService/bookManagement';
 
 export const BooksTable = () => {
+  const [books, setBooks] = useState<BookWithGenre[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const data = await getBooksForManagement();
+        setBooks(data);
+      } catch (error) {
+        console.error('Erro ao buscar livros:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchTerm.toLowerCase())
+    book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.genre.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleAvailability = (bookId: number) => {
-    // Aqui você implementaria a lógica para alterar disponibilidade
-    console.log('Toggle availability for book:', bookId);
-  };
+  const toggleAvailability = async (bookId: number) => {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
 
-  const editBook = (bookId: number) => {
-    // Aqui você implementaria a lógica para editar livro
-    console.log('Edit book:', bookId);
-  };
+    try {
+      const result = await editBook({
+        id: bookId,
+        title: book.title,
+        author: book.author,
+        description: '', 
+        available: !book.available,
+      });
 
-  const deleteBook = (bookId: number) => {
-    // Aqui você implementaria a lógica para deletar livro
-    if (confirm('Tem certeza que deseja deletar este livro?')) {
-      console.log('Delete book:', bookId);
+      if (result.success) {
+        setBooks(prevBooks =>
+          prevBooks.map(b =>
+            b.id === bookId ? { ...b, available: !b.available } : b
+          )
+        );
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao alterar disponibilidade:', error);
+      alert('Erro ao alterar disponibilidade do livro');
     }
   };
+
+  const editBookHandler = (bookId: number) => {
+    // Por enquanto, apenas um alert. Em uma implementação completa,
+    // isso abriria um modal de edição
+    alert(`Editar livro ${bookId} - Funcionalidade a ser implementada`);
+  };
+
+  const deleteBook = async (bookId: number) => {
+    if (!confirm('Tem certeza que deseja deletar este livro?')) return;
+
+    try {
+      const result = await removeBook(bookId);
+      if (result.success) {
+        // Remover do estado local
+        setBooks(prevBooks => prevBooks.filter(b => b.id !== bookId));
+        alert('Livro removido com sucesso!');
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao deletar livro:', error);
+      alert('Erro ao deletar livro');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 bg-stone-200 rounded animate-pulse"></div>
+          <div className="flex-1">
+            <div className="h-4 bg-stone-200 rounded mb-2"></div>
+            <div className="h-3 bg-stone-200 rounded w-1/3"></div>
+          </div>
+        </div>
+        <div className="space-y-3 animate-pulse">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-16 bg-stone-200 rounded"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
@@ -96,7 +124,6 @@ export const BooksTable = () => {
               <th className="text-left py-3 px-4 text-xs font-bold text-stone-500 uppercase tracking-wider">Autor</th>
               <th className="text-left py-3 px-4 text-xs font-bold text-stone-500 uppercase tracking-wider">Gênero</th>
               <th className="text-center py-3 px-4 text-xs font-bold text-stone-500 uppercase tracking-wider">Disponibilidade</th>
-              <th className="text-center py-3 px-4 text-xs font-bold text-stone-500 uppercase tracking-wider">Exemplares</th>
               <th className="text-center py-3 px-4 text-xs font-bold text-stone-500 uppercase tracking-wider">Ações</th>
             </tr>
           </thead>
@@ -106,12 +133,10 @@ export const BooksTable = () => {
                 <td className="py-4 px-4">
                   <div>
                     <p className="text-sm font-bold text-stone-900">{book.title}</p>
-                    <p className="text-xs text-stone-500">ISBN: {book.isbn}</p>
                   </div>
                 </td>
                 <td className="py-4 px-4">
                   <p className="text-sm text-stone-600">{book.author}</p>
-                  <p className="text-xs text-stone-500">{book.publicationYear}</p>
                 </td>
                 <td className="py-4 px-4">
                   <span className="px-2 py-1 text-xs font-bold bg-stone-100 text-stone-700 rounded-full">
@@ -141,14 +166,9 @@ export const BooksTable = () => {
                   </button>
                 </td>
                 <td className="py-4 px-4 text-center">
-                  <span className="text-sm font-bold text-stone-900">
-                    {book.availableCopies}/{book.totalCopies}
-                  </span>
-                </td>
-                <td className="py-4 px-4 text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => editBook(book.id)}
+                      onClick={() => editBookHandler(book.id)}
                       className="p-1 hover:bg-stone-200 rounded transition-colors"
                       title="Editar"
                     >

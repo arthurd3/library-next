@@ -11,7 +11,7 @@ interface RegisterUserParams {
 
 export async function registerUser(params: RegisterUserParams) {
   try {
-    // Verificar se usuário já existe
+    
     const existingUser = await UserDao.getUserByEmail(params.email);
     if (existingUser) {
       return { success: false, error: 'Usuário com este email já existe' };
@@ -22,7 +22,6 @@ export async function registerUser(params: RegisterUserParams) {
       return { success: false, error: 'Usuário com esta matrícula já existe' };
     }
 
-    // Criar usuário (roleId padrão = 3 para usuário comum)
     const newUser = await UserDao.createUser(
       params.name,
       params.email,
@@ -32,7 +31,6 @@ export async function registerUser(params: RegisterUserParams) {
       params.address
     );
 
-    // Retornar sucesso sem a senha
     const { password: _, ...userWithoutPassword } = newUser;
     return { success: true, user: userWithoutPassword };
   } catch (error) {

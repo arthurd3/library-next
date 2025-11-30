@@ -1,46 +1,63 @@
 import { Users, UserPlus, Search, MoreVertical } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getUsersForManagement, UserForManagement } from '@/src/lib/actions/services/adminService/userManagement';
 
-const recentUsers = [
-  {
-    id: 1,
-    name: 'Maria Silva',
-    email: 'maria.silva@email.com',
-    registration: '2024001',
-    role: 'user',
-    joinDate: '2024-01-15',
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'João Santos',
-    email: 'joao.santos@email.com',
-    registration: '2024002',
-    role: 'user',
-    joinDate: '2024-01-14',
-    status: 'active',
-  },
-  {
-    id: 3,
-    name: 'Ana Costa',
-    email: 'ana.costa@email.com',
-    registration: '2024003',
-    role: 'librarian',
-    joinDate: '2024-01-13',
-    status: 'active',
-  },
-  {
-    id: 4,
-    name: 'Pedro Lima',
-    email: 'pedro.lima@email.com',
-    registration: '2024004',
-    role: 'user',
-    joinDate: '2024-01-12',
-    status: 'suspended',
-  },
-];
+export const UserManagement = () => {
+  const [users, setUsers] = useState<UserForManagement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-export const UserManagement = () => (
-  <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await getUsersForManagement(10);
+        setUsers(data);
+      } catch (error) {
+        console.error('Erro ao buscar usuários:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.registration.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-extrabold text-stone-900 tracking-tight">Gerenciamento de Usuários</h3>
+          <Users className="w-5 h-5 text-stone-400" />
+        </div>
+        <div className="space-y-3 animate-pulse">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between p-3 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-stone-200 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-stone-200 rounded mb-1"></div>
+                  <div className="h-3 bg-stone-200 rounded w-2/3"></div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="h-6 bg-stone-200 rounded w-16"></div>
+                <div className="h-6 bg-stone-200 rounded w-12"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-stone-100 shadow-xl shadow-stone-200/50 p-6">
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-lg font-extrabold text-stone-900 tracking-tight">Gerenciamento de Usuários</h3>
       <Users className="w-5 h-5 text-stone-400" />
@@ -52,6 +69,8 @@ export const UserManagement = () => (
         <input
           type="text"
           placeholder="Buscar usuários..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-stone-600 focus:border-transparent transition-all duration-200"
         />
       </div>
@@ -62,7 +81,7 @@ export const UserManagement = () => (
     </div>
 
     <div className="space-y-3">
-      {recentUsers.map((user) => (
+      {filteredUsers.map((user) => (
         <div key={user.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 transition-colors">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-stone-200 rounded-full flex items-center justify-center">
@@ -102,4 +121,5 @@ export const UserManagement = () => (
       Ver todos os usuários
     </button>
   </div>
-);
+  );
+};

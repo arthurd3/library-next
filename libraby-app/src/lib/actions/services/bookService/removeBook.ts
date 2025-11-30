@@ -1,3 +1,5 @@
+'use server';
+
 import { BookDao } from '@/src/db';
 
 export async function removeBook(id: number) {

@@ -1,7 +1,7 @@
 import { User } from "@/src/models/UserModel";
 
 interface AuthContextType {
-  user: User | null;
+  user: Omit<User, 'password'> | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;

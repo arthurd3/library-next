@@ -1,5 +1,5 @@
-// Login Actions
-export { loginFunction } from './login/loginFunction';
+// Auth Actions
+export { loginAction, logoutAction, getCurrentUser } from './authActions';
 
 // User Service Actions
 export { createUser } from './services/userService/createUser';

@@ -1,3 +1,5 @@
+'use server';
+
 import { UserDao } from '@/src/db';
 
 interface CreateUserParams {
