@@ -11,6 +11,7 @@ export interface BookWithGenre {
   available: boolean;
   totalCopies: number;
   availableCopies: number;
+  description?: string;
 }
 
 export async function getBooksForManagement(): Promise<BookWithGenre[]> {
@@ -27,7 +28,8 @@ export async function getBooksForManagement(): Promise<BookWithGenre[]> {
       genre: genreMap.get(book.genre) || 'Desconhecido',
       available: book.available,
       totalCopies: 1, 
-      availableCopies: book.available ? 1 : 0, 
+      availableCopies: book.available ? 1 : 0,
+      description: book.description,
     }));
   } catch (error) {
     console.error('Erro ao buscar livros para gerenciamento:', error);

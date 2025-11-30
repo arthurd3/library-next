@@ -1,19 +1,52 @@
-import { BookOpen, Search, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { editBook } from '@/src/lib/actions/services/bookService/editBook';
-import { removeBook } from '@/src/lib/actions/services/bookService/removeBook';
-import { BookWithGenre, getBooksForManagement } from '@/src/lib/actions/services/adminService/bookManagement';
+import { Genre, GenreDao } from "@/src/db";
+import { editBook } from "@/src/lib/actions/services/bookService/editBook";
+import { removeBook } from "@/src/lib/actions/services/bookService/removeBook";
+import { BookWithGenre, getBooksForManagement } from "@/src/lib/actions/services/adminService/bookManagement";
+import { getBookLoans } from "@/src/lib/actions/services/adminService/getBookLoans";
+import { getAllGenres } from "@/src/lib/actions/services/adminService/getGenres";
+import { BookOpen, Edit, Eye, EyeOff, Search, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface LoanWithUser {
+  id: number;
+  user_id: number;
+  book_id: number;
+  loan_date: Date;
+  due_date: Date;
+  return_date: Date | null;
+  status: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    registration: string;
+  };
+}
 
 export const BooksTable = () => {
   const [books, setBooks] = useState<BookWithGenre[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingBook, setEditingBook] = useState<BookWithGenre | null>(null);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [bookLoans, setBookLoans] = useState<LoanWithUser[]>([]);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    author: '',
+    description: '',
+    genre: '',
+    available: true,
+  });
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const data = await getBooksForManagement();
-        setBooks(data);
+        const [booksData, genresData] = await Promise.all([
+          getBooksForManagement(),
+          getAllGenres()
+        ]);
+        setBooks(booksData);
+        setGenres(genresData);
       } catch (error) {
         console.error('Erro ao buscar livros:', error);
       } finally {
@@ -58,10 +91,67 @@ export const BooksTable = () => {
     }
   };
 
-  const editBookHandler = (bookId: number) => {
-    // Por enquanto, apenas um alert. Em uma implementação completa,
-    // isso abriria um modal de edição
-    alert(`Editar livro ${bookId} - Funcionalidade a ser implementada`);
+  const editBookHandler = async (bookId: number) => {
+    const book = books.find(b => b.id === bookId);
+    if (book) {
+      setEditingBook(book);
+      setEditForm({
+        title: book.title,
+        author: book.author,
+        description: book.description || '',
+        genre: book.genre,
+        available: book.available,
+      });
+
+      // Buscar empréstimos ativos do livro
+      try {
+        const loansWithUsers = await getBookLoans(bookId);
+        setBookLoans(loansWithUsers);
+      } catch (error) {
+        console.error('Erro ao buscar empréstimos do livro:', error);
+        setBookLoans([]);
+      }
+    }
+  };
+
+  const saveBookEdit = async () => {
+    if (!editingBook) return;
+
+    // Encontrar o ID do gênero selecionado
+    const selectedGenre = genres.find(g => g.name === editForm.genre);
+    const genreId = selectedGenre ? selectedGenre.id : undefined;
+
+    try {
+      const result = await editBook({
+        id: editingBook.id,
+        title: editForm.title,
+        author: editForm.author,
+        description: editForm.description,
+        genreId,
+        available: editForm.available,
+      });
+
+      if (result.success) {
+        setBooks(prevBooks =>
+          prevBooks.map(b =>
+            b.id === editingBook.id
+              ? { ...b, title: editForm.title, author: editForm.author, description: editForm.description, genre: editForm.genre, available: editForm.available }
+              : b
+          )
+        );
+        setEditingBook(null);
+        alert('Livro atualizado com sucesso!');
+      } else {
+        alert(`Erro: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Erro ao editar livro:', error);
+      alert('Erro ao editar livro');
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingBook(null);
   };
 
   const deleteBook = async (bookId: number) => {
@@ -209,6 +299,142 @@ export const BooksTable = () => {
           </button>
         </div>
       </div>
+
+      {/* Modal de Edição */}
+      {editingBook && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[2rem] p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-stone-900">Editar Livro</h3>
+              <button
+                onClick={cancelEdit}
+                className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-stone-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">
+                  Título
+                </label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-600 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">
+                  Autor
+                </label>
+                <input
+                  type="text"
+                  value={editForm.author}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, author: e.target.value }))}
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-600 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">
+                  Gênero
+                </label>
+                <select
+                  value={editForm.genre}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, genre: e.target.value }))}
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-600 focus:border-transparent"
+                >
+                  <option value="">Selecione um gênero</option>
+                  {genres.map((genre) => (
+                    <option key={genre.id} value={genre.name}>
+                      {genre.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-stone-700 mb-2">
+                  Descrição
+                </label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-600 focus:border-transparent resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="available"
+                  checked={editForm.available}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, available: e.target.checked }))}
+                  className="w-4 h-4 text-stone-600 bg-stone-100 border-stone-300 rounded focus:ring-stone-500 focus:ring-2"
+                />
+                <label htmlFor="available" className="text-sm font-bold text-stone-700">
+                  Disponível para empréstimo
+                </label>
+              </div>
+            </div>
+
+            {/* Seção de Empréstimos Ativos */}
+            {bookLoans.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-stone-200">
+                <h4 className="text-sm font-bold text-stone-700 mb-3">Empréstimos Ativos</h4>
+                <div className="space-y-3">
+                  {bookLoans.map((loan) => (
+                    <div key={loan.id} className="bg-stone-50 p-3 rounded-lg">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="font-bold text-stone-600">Nome:</span>
+                          <p className="text-stone-800">{loan.user?.name || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="font-bold text-stone-600">Email:</span>
+                          <p className="text-stone-800">{loan.user?.email || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="font-bold text-stone-600">ID:</span>
+                          <p className="text-stone-800">{loan.user?.id || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="font-bold text-stone-600">Matrícula:</span>
+                          <p className="text-stone-800">{loan.user?.registration || 'N/A'}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="font-bold text-stone-600">Vencimento:</span>
+                          <p className="text-stone-800">{new Date(loan.due_date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={cancelEdit}
+                className="flex-1 px-4 py-2 text-stone-700 font-bold border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveBookEdit}
+                className="flex-1 px-4 py-2 bg-stone-800 text-white font-bold rounded-lg hover:bg-stone-900 transition-colors"
+              >
+                Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
