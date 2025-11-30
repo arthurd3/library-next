@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
 
-  if (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '') {
-    console.log('Redirecionando / para /login');
+  if (path === '/') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
+  
   return NextResponse.next();
 }
 
@@ -16,4 +17,4 @@ export const config = {
     '/login/:path*',
     '/user/:path*',
   ],
-}; 
+};
