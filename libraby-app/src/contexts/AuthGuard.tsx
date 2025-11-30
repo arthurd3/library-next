@@ -1,64 +1,40 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import { ReactNode } from 'react';
 
 interface AuthGuardProps {
-  children: ReactNode;
-  allowedRoles?: string | string[];
+  children: ReactNode,
+  allowedRoles?: string[];
 }
 
-const fallbackPath = '/';
+const FALLBACK_PATH = '/login';
 
-export const AuthGuard = ({ 
-  children, 
+export const AuthGuard = ({
+  children,
   allowedRoles = ['admin', 'librarian', 'user']
 }: AuthGuardProps) => {
 
-  const { user , logout} = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-
-  const hasAccess = () => {
-    if (!user) return false;
-    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-    return roles.includes(user.role);
-  };
 
   useEffect(() => {
 
-    if (user === null) {
+    if (!user) {
+      router.replace(FALLBACK_PATH);
       return;
     }
 
-    if (!hasAccess()) {
-      logout();
-      router.push(fallbackPath);
+    const hasRole = allowedRoles.includes(user.role);
+
+    if (!hasRole) {
+      router.replace('/unauthorized');
+      return;
     }
-
+    
   }, [user, router, allowedRoles]);
-
-
-  //SETA UM LOADING ENQUANTO VERIFICA AS PERMISSOES
-  if (user === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-stone-900 mx-auto mb-4"></div>
-          <p className="text-stone-600">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  //SE NAO TEM ACESSO NAO RENDERIZA NADA
-  if (!hasAccess()) {
-    return null;
-  }
 
   return <>{children}</>;
 };
-
-
-

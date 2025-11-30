@@ -7,6 +7,5 @@ export const config = {
   matcher: [
     '/',
     '/login/:path*',
-    '/user/:path*',
   ],
 };
