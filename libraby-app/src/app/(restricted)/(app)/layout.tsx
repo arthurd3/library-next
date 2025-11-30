@@ -5,5 +5,5 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthGuard>{children}</AuthGuard>;
+  return <AuthGuard> {children} </AuthGuard>;
 }

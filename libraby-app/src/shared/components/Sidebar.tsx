@@ -1,4 +1,6 @@
-import { BookOpen, Clock, Users, AlertCircle, LogOut, LayoutDashboard } from 'lucide-react';
+'use client';
+
+import { BookOpen, Clock, Users, AlertCircle, LogOut, LayoutDashboard, UserSearch, UserSquare2Icon, UserPlus2, BookmarkCheckIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,6 +14,22 @@ export const Sidebar = ({ sidebarOpen }: SidebarProps) => {
   const pathname = usePathname();
   const { logout } = useAuth();
   const router = useRouter();
+  const userRole = useAuth().user?.role;
+
+  function containsPermissionAdmin(){
+      if(userRole === 'admin'){
+        return true;
+      }
+      return false;
+  }
+
+  function containsPermissionLibrarian(){
+      if(userRole === 'librarian' || userRole === 'admin'){
+        return true;
+      }
+      return false;
+  }
+
 
   return (
   <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-stone-900 text-stone-400 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] flex-shrink-0 flex flex-col shadow-2xl z-20`}>
@@ -29,7 +47,21 @@ export const Sidebar = ({ sidebarOpen }: SidebarProps) => {
         { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
         { icon: Clock, label: 'Empréstimos', href: '/mybooks' },
         { icon: AlertCircle, label: 'Multas', href: '/fines' },
+        
         { icon: Users, label: 'Perfil', href: '/profile' },
+        
+        // Librarian Links
+        ...(containsPermissionLibrarian() ? [
+          { icon: BookmarkCheckIcon, label: 'Gerenciar Livros', href: '/manage-books' }
+        ] : []),
+        
+        // Admin Links
+        ...(containsPermissionAdmin() ? [
+          { icon: UserSquare2Icon, label: 'Painel Admin', href: '/restricted/admin-dashboard' } , 
+          { icon: UserPlus2, label: 'Register User', href: '/restricted/register-user' }
+        ] : []),
+        
+        
       ].map((item, idx) => {
         const active = pathname === item.href;
         return (

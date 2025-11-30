@@ -1,3 +1,5 @@
+'use client';
+
 import { Search, Bell, Menu, ChevronRight } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
