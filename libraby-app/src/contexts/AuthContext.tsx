@@ -1,14 +1,13 @@
 'use client';
 
-import { createContext, useContext, useState} from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType } from './models/authContextType';
-import { User } from '../models/UserModel';
+import { User } from '../models/UserModel'; 
 import { AuthProviderProps } from './models/authProviderProps';
 import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-//PRECISA PASSAR NO AUTH PROVIDER
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -19,9 +18,38 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true); 
   const router = useRouter();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const hasRoleCookie = document.cookie.split(';').some((item) => item.trim().startsWith('user_role='));
+
+        if (hasRoleCookie) {
+          const recoveredUser: User = {
+            id: 1,
+            name: 'Arthur Silva',
+            email: 'admin@gmail.com',
+            registration: '2023001',
+            role: 'user', 
+            created_at: new Date(),
+          };
+          setUser(recoveredUser);
+        }
+      } catch (error) {
+        console.error('Erro ao restaurar sessão:', error);
+      } finally {
+       
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+  }, []);
   
   const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true); 
     try {
       if (email === 'admin@gmail.com' && password === '123456') {
         const mockUser: User = {
@@ -29,12 +57,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           name: 'Arthur Silva',
           email: 'admin@gmail.com',
           registration: '2023001',
-          role: 'admin',
+          role: 'user',
           created_at: new Date(),
         };
         setUser(mockUser);
 
-        // ROLE NO COOKIE -> 24H
         document.cookie = `user_role=${mockUser.role}; path=/; max-age=86400`; 
         return true;
       }
@@ -42,6 +69,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error('Login error:', error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,7 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
