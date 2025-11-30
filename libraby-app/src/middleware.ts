@@ -1,15 +1,7 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { mainMiddleware, middlewareConfig } from './middleware/mainMiddleware'; 
 
-export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
+export { mainMiddleware as middleware };
 
-  if (path === '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-  
-  return NextResponse.next();
-}
 
 export const config = {
   matcher: [
