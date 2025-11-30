@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             name: 'Arthur Silva',
             email: 'admin@gmail.com',
             registration: '2023001',
-            role: 'user', 
+            role: 'admin', 
             created_at: new Date(),
           };
           setUser(recoveredUser);
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           name: 'Arthur Silva',
           email: 'admin@gmail.com',
           registration: '2023001',
-          role: 'user',
+          role: 'admin',
           created_at: new Date(),
         };
         setUser(mockUser);

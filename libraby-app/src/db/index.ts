@@ -1,9 +1,9 @@
 // Database Services
-export { BookService } from './db/bookdb';
-export { UserService } from './db/userdb';
-export { GenreService } from './db/genredb';
-export { LoanService } from './db/loansdb';
-export { FineService } from './db/finesdb';
+export { BookService } from './bookdb';
+export { UserService } from './userdb';
+export { GenreService } from './genredb';
+export { LoanService } from './loansdb';
+export { FineService } from './finesdb';
 
 // Models
 export type { Book } from '@/src/models/BookModel';

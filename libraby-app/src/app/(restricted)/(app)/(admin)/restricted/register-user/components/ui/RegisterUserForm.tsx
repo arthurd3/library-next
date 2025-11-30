@@ -37,13 +37,6 @@ export const RegisterUserForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Aqui você implementaria a chamada para a API
-      console.log('Dados do usuário:', formData);
-
-      // Simulação de delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Reset do formulário após sucesso
       setFormData({
         name: '',
         email: '',
