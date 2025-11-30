@@ -13,9 +13,9 @@ export async function loginFunction(email: string, password: string): Promise<{ 
       return { success: false, message: 'Senha incorreta' };
     }
 
-    // Retornar sucesso com dados do usuário (sem senha)
     const { password: _, ...userWithoutPassword } = user;
     return { success: true, user: userWithoutPassword };
+    
   } catch (error) {
     console.error('Erro no login:', error);
     return { success: false, message: 'Erro interno do servidor' };

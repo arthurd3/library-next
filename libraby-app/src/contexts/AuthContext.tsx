@@ -5,6 +5,7 @@ import { AuthContextType } from './models/authContextType';
 import { User } from '../models/UserModel'; 
 import { AuthProviderProps } from './models/authProviderProps';
 import { useRouter } from 'next/navigation';
+import { findUserById, loginFunction } from '../lib/actions';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -25,20 +26,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const checkSession = async () => {
       try {
         const hasRoleCookie = document.cookie.split(';').some((item) => item.trim().startsWith('user_role='));
+        const hasIdCookie = document.cookie.split(';').some((item) => item.trim().startsWith('user_id='));
+        if (hasRoleCookie && hasIdCookie) {
+            const userId = parseInt(document.cookie.split('; ').find(row => row.startsWith('user_id='))!.split('=')[1]);
 
-        if (hasRoleCookie) {
-          const recoveredUser: User = {
-            id: 1,
-            name: 'Arthur Silva',
-            email: 'admin@gmail.com',
-            registration: '2023001',
-            role: 'admin', 
-            created_at: new Date(),
-          };
-          setUser(recoveredUser);
+            findUserById(userId).then((userData => {
+                if(userData.user){
+                    setUser(userData.user);
+                }
+            }));
         }
-      } catch (error) {
-        console.error('Erro ao restaurar sessão:', error);
       } finally {
         setIsLoading(false);
       }
@@ -50,24 +47,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true); 
     try {
-      if (email === 'admin@gmail.com' && password === '123456') {
-        const mockUser: User = {
-          id: 1,
-          name: 'Arthur Silva',
-          email: 'admin@gmail.com',
-          registration: '2023001',
-          role: 'admin',
-          created_at: new Date(),
-        };
-        setUser(mockUser);
+        loginFunction(email, password).then((response) => {
+            if (response.success && response.user) {
+            setUser(response.user);
 
-        document.cookie = `user_role=${mockUser.role}; path=/; max-age=86400`; 
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
+            document.cookie = `user_role=${response.user.role}; path=/`;
+            document.cookie = `user_name=${response.user.name}; path=/`;
+            document.cookie = `user_id=${response.user.id}; path=/`;
+            document.cookie = `user_email=${response.user.email}; path=/`;
+
+            return Promise.resolve(true);
+            } 
+        });
+        return false;
     } finally {
       setIsLoading(false);
     }
