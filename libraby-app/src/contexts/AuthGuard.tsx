@@ -21,7 +21,14 @@ export const AuthGuard = ({
   const router = useRouter();
 
   const hasUser = !!user;
-  const hasPermission = user && allowedRoles.includes(user.role);
+
+  const hasPermission = user && 
+    allowedRoles.includes(user.role) || 
+    user?.role !== undefined || 
+    user?.role !== null || 
+    user?.role !== '' || 
+    user?.role !== ' ';
+
   const canShowContent = !isLoading && hasUser && hasPermission;
 
   useEffect(() => {

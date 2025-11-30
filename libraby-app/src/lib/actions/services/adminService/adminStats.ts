@@ -4,6 +4,7 @@ import { UserDao } from '@/src/db/userdb';
 import { BookDao } from '@/src/db/bookdb';
 import { LoanDao } from '@/src/db/loansdb';
 import { FineDao } from '@/src/db/finesdb';
+import pool from '@/src/db/connection/db';
 
 export interface AdminStats {
   totalUsers: number;
@@ -25,7 +26,8 @@ export async function getAdminStats(): Promise<AdminStats> {
     const totalBooks = books.length;
 
     // Empréstimos ativos
-    const allLoans = await LoanDao.getAllLoans();
+    const allLoansQuery = await pool.query('SELECT * FROM loans');
+    const allLoans = allLoansQuery.rows;
     const activeLoans = allLoans.filter(loan => loan.status === 'active').length;
 
     // Multas pendentes

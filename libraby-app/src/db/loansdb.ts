@@ -2,13 +2,13 @@ import pool from './connection/db';
 import { Loan } from '@/src/models/LoanModel';
 
 export class LoanDao {
-  static async getAllLoans(): Promise<Loan[]> {
+  static async getLoanById(id: number): Promise<Loan | null> {
     try {
-      const query = 'SELECT * FROM loans ORDER BY loan_date DESC';
-      const result = await pool.query(query);
-      return result.rows;
+      const query = 'SELECT * FROM loans WHERE id = $1';
+      const result = await pool.query(query, [id]);
+      return result.rows[0] || null;
     } catch (error) {
-      console.error('Erro ao buscar empréstimos:', error);
+      console.error('Erro ao buscar empréstimo por ID:', error);
       throw error;
     }
   }

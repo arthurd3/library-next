@@ -13,10 +13,9 @@ export interface LoanForTable {
   status: 'active' | 'overdue' | 'returned';
 }
 
-export async function getLoansForTable(limit: number = 10): Promise<LoanForTable[]> {
+export async function getLoansForTable(limit: number = 10, userId?: number): Promise<LoanForTable[]> {
   try {
-    // Query com joins para buscar empréstimos com informações do livro e usuário
-    const query = `
+    let query = `
       SELECT
         l.id,
         b.title as book_title,
@@ -28,10 +27,22 @@ export async function getLoansForTable(limit: number = 10): Promise<LoanForTable
       FROM loans l
       LEFT JOIN books b ON l.book_id = b.id
       LEFT JOIN users u ON l.user_id = u.id
+    `;
+
+    const params: (string | number)[] = [limit];
+
+    // Se userId for fornecido, filtra apenas os empréstimos do usuário
+    if (userId) {
+      query += ` WHERE l.user_id = $${params.length + 1}`;
+      params.push(userId);
+    }
+
+    query += `
       ORDER BY l.created_at DESC
       LIMIT $1
     `;
-    const result = await pool.query(query, [limit]);
+
+    const result = await pool.query(query, params);
 
     return result.rows.map(row => {
       // Calcular iniciais do nome do usuário

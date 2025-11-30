@@ -32,7 +32,8 @@ export async function getUserStats(userId?: number): Promise<UserStats> {
       booksAcquired = userLoans.length;
     } else {
       // Estatísticas gerais se não houver userId
-      const allLoans = await LoanDao.getAllLoans();
+      const allLoansQuery = await pool.query('SELECT * FROM loans');
+      const allLoans = allLoansQuery.rows;
       activeLoans = allLoans.filter(loan => loan.status === 'active').length;
       overdueLoans = allLoans.filter(loan => {
         if (loan.status !== 'active') return false;

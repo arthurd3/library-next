@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getLoansForUser, LoanForTable } from '@/src/lib/actions/services/loanTable';
+import { returnBook } from '@/src/lib/actions/returnBook';
 
 type LoanStatus = 'active' | 'overdue' | 'returned';
 
@@ -23,6 +24,7 @@ export const MyBooksView = () => {
   const { user } = useAuth();
   const [loans, setLoans] = useState<LoanForTable[]>([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -40,6 +42,26 @@ export const MyBooksView = () => {
 
     fetchLoans();
   }, [user?.id]);
+
+  const handleReturnBook = async (loanId: number) => {
+    if (!user?.id) return;
+
+    const formData = new FormData();
+    formData.append('loanId', loanId.toString());
+    formData.append('userId', user.id.toString());
+
+    const result = await returnBook(formData);
+
+    if (result.success) {
+      setMessage({ type: 'success', text: result.message });
+      const data = await getLoansForUser(user.id);
+      setLoans(data);
+    } else {
+      setMessage({ type: 'error', text: result.message });
+    }
+
+    setTimeout(() => setMessage(null), 3000);
+  };
 
   if (loading) {
     return (
@@ -94,6 +116,16 @@ export const MyBooksView = () => {
 
   return (
     <>
+      {message && (
+        <div className={`mb-4 p-3 rounded-lg ${
+          message.type === 'success'
+            ? 'bg-green-50 border border-green-200 text-green-800'
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          {message.text}
+        </div>
+      )}
+
       <div className="mb-10">
         <h1 className="text-3xl font-extrabold text-stone-900 tracking-tighter">Meus Livros</h1>
         <p className="text-stone-500 text-sm mt-1 font-medium tracking-normal">Livros emprestados atualmente</p>
@@ -123,7 +155,7 @@ export const MyBooksView = () => {
                   </td>
                 </tr>
               ) : (
-                loans.map((loan) => (
+                loans.map((loan: LoanForTable) => (
                   <tr key={loan.id} className="group hover:bg-stone-50 transition-colors duration-200">
                     <td className="px-8 py-5">
                       <span className="font-bold text-stone-800 text-sm group-hover:text-stone-900">{loan.bookTitle}</span>
@@ -138,9 +170,18 @@ export const MyBooksView = () => {
                       <StatusBadge status={loan.status} />
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <button className="px-4 py-2 bg-stone-800 hover:bg-stone-900 text-white text-xs font-bold rounded-lg transition-all">
-                        Renovar
-                      </button>
+                      <div className="flex gap-2 justify-end">
+                        <button className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-lg transition-all">
+                          Renovar
+                        </button>
+                        <button
+                          onClick={() => handleReturnBook(loan.id)}
+                          disabled={loan.status === 'returned'}
+                          className="px-3 py-2 bg-stone-800 hover:bg-stone-900 disabled:bg-stone-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg transition-all"
+                        >
+                          {loan.status === 'returned' ? 'Devolvido' : 'Devolver'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

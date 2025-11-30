@@ -4,6 +4,7 @@ import { UserDao } from '@/src/db/userdb';
 import { LoanDao } from '@/src/db/loansdb';
 import { FineDao } from '@/src/db/finesdb';
 import { BookDao } from '@/src/db/bookdb';
+import pool from '@/src/db/connection/db';
 import { UserPlus, BookOpen, AlertCircle } from 'lucide-react';
 import { ComponentType } from 'react';
 
@@ -42,10 +43,9 @@ export async function getRecentActivities(limit: number = 10): Promise<Activity[
     });
 
     // Buscar empréstimos recentes
-    const allLoans = await LoanDao.getAllLoans();
-    const recentLoans = allLoans
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5);
+    const allLoansQuery = await pool.query('SELECT * FROM loans ORDER BY created_at DESC');
+    const allLoans = allLoansQuery.rows;
+    const recentLoans = allLoans.slice(0, 5);
 
     // Buscar nomes dos usuários e livros para os empréstimos
     const userMap = new Map(recentUsers.map(u => [u.id, u.name]));

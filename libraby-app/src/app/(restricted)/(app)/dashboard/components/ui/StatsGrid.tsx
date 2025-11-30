@@ -3,16 +3,18 @@ import { useState, useEffect } from 'react';
 import { StatCard } from './StatCard';
 import { getUserStats, UserStats } from '@/src/lib/actions/services/userStats';
 
-export const StatsGrid = () => {
+interface StatsGridProps {
+  userId?: number;
+}
+
+export const StatsGrid = ({ userId }: StatsGridProps) => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Por enquanto, busca estatísticas gerais. Em uma implementação completa,
-        // deveria buscar o userId do contexto de autenticação
-        const data = await getUserStats();
+        const data = await getUserStats(userId);
         setStats(data);
       } catch (error) {
         console.error('Erro ao buscar estatísticas:', error);
@@ -22,7 +24,7 @@ export const StatsGrid = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [userId]);
 
   if (loading) {
     return (
@@ -49,10 +51,10 @@ export const StatsGrid = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-      <StatCard title="Total no Acervo" value={stats.totalBooks.toString()} icon={BookOpen} trend="+0 novos" />
-      <StatCard title="Empréstimos Ativos" value={stats.activeLoans.toString()} icon={Clock} trend="Verificar prazos" />
-      <StatCard title="Livros Adquiridos" value={stats.booksAcquired.toString()} icon={Book} trend="Histórico" />
-      <StatCard title="Atrasos Críticos" value={stats.overdueLoans.toString()} icon={AlertCircle} trend="Ação necessária" />
+      <StatCard title="Meus Empréstimos Ativos" value={stats.activeLoans.toString()} icon={Clock} trend="Em andamento" />
+      <StatCard title="Livros Já Lidos" value={stats.booksAcquired.toString()} icon={Book} trend="Histórico completo" />
+      <StatCard title="Empréstimos Atrasados" value={stats.overdueLoans.toString()} icon={AlertCircle} trend={stats.overdueLoans > 0 ? "Ação necessária" : "Tudo em dia"} />
+      <StatCard title="Disponíveis para Empréstimo" value={stats.totalBooks.toString()} icon={BookOpen} trend="No acervo" />
     </div>
   );
 };
