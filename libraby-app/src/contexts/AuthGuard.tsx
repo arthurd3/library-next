@@ -6,7 +6,7 @@ import { useAuth } from './AuthContext';
 import { ReactNode } from 'react';
 
 interface AuthGuardProps {
-  children: ReactNode,
+  children: ReactNode;
   allowedRoles?: string[];
 }
 
@@ -17,24 +17,30 @@ export const AuthGuard = ({
   allowedRoles = ['admin', 'librarian', 'user']
 }: AuthGuardProps) => {
 
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth(); 
   const router = useRouter();
 
+  const hasUser = !!user;
+  const hasPermission = user && allowedRoles.includes(user.role);
+  const canShowContent = !isLoading && hasUser && hasPermission;
+
   useEffect(() => {
-
-    if (!user) {
-      router.replace(FALLBACK_PATH);
-      return;
+    if (!isLoading) {
+      if (!hasUser) {
+        router.replace(FALLBACK_PATH);
+      } else if (!hasPermission) {
+        router.replace('/unauthorized');
+      }
     }
+  }, [isLoading, hasUser, hasPermission, router]);
 
-    const hasRole = allowedRoles.includes(user.role);
+  if (isLoading) {
+    return null; 
+  }
 
-    if (!hasRole) {
-      router.replace('/unauthorized');
-      return;
-    }
-    
-  }, [user, router, allowedRoles]);
+  if (!canShowContent) {
+    return null;
+  }
 
   return <>{children}</>;
 };
